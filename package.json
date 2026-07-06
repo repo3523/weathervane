@@ -1,0 +1,24 @@
+{
+  "name": "weathervane",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
+    "@supabase/supabase-js": "^2.110.1",
+    "lottie-react": "^2.4.1",
+    "openai": "^6.45.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "replicate": "^1.4.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.8"
+  }
+}

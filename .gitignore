@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.log
+vite.config.js.timestamp-*
+
+# Session exports — never commit; may contain real child observations
+weathervane-log-*.json
+.vercel
+
+# Local env — Supabase keys, never commit
+.env.local
