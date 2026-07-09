@@ -4,7 +4,7 @@ import { say } from "../lib/speech.js";
 import { confetti } from "../lib/fx.js";
 import { CharacterCorner } from "./screens.jsx";
 
-const ADVANCE_DELAY = 2500; // ms before forward tap is accepted
+const ADVANCE_DELAY = 3000; // ms before forward tap is accepted
 
 function BookPage({ step, character, dim = false, pageNum = null, titlePage = null }) {
   return (
@@ -48,7 +48,7 @@ export function StoryReader({ story, onDone }) {
     if (view !== "reading") return;
     setReady(false);
     // Announce "next page" when the delay clears
-    const t = setTimeout(() => { setReady(true); say("Next page"); }, ADVANCE_DELAY);
+    const t = setTimeout(() => setReady(true), ADVANCE_DELAY);
     say(current.text);
     for (let ahead = 1; ahead <= 2; ahead++) {
       const next = story.steps[page + ahead];
