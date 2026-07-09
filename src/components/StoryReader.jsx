@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Wolf, BigButton } from "./ui.jsx";
 import { say } from "../lib/speech.js";
 import { confetti } from "../lib/fx.js";
+import { CharacterCorner } from "./screens.jsx";
 
 const ADVANCE_DELAY = 2500; // ms before forward tap is accepted
 
@@ -117,6 +118,7 @@ export function StoryReader({ story, onDone }) {
   // ── Reading — open book spread ──
   return (
     <div className="story-reading fade-in" onClick={advance}>
+      <CharacterCorner />
       <p className="story-reading-title">{story.title}</p>
       <div className="story-book">
         {/* Left page — previous step, or title page on step 0 */}

@@ -166,6 +166,16 @@ export function Goodbye({ onRate }) {
   );
 }
 
+/* Small character in bottom-right corner during activities, doing periodic tricks */
+export function CharacterCorner() {
+  const t = useTheme();
+  return (
+    <div className="char-corner">
+      <Wolf face={t.character.emoji} mood="idle" size="sm" avatarUrl={t.character.avatarUrl} />
+    </div>
+  );
+}
+
 export function Night() {
   const t = useTheme();
   return (

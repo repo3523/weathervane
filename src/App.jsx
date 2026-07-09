@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { ScheduleStrip } from "./components/ui.jsx";
-import { StartScreen, WeatherCheck, WeatherReaction, BubbleGame, ResetChoice, Goodbye, Night } from "./components/screens.jsx";
+import { StartScreen, WeatherCheck, WeatherReaction, BubbleGame, ResetChoice, Goodbye, Night, CharacterCorner } from "./components/screens.jsx";
 import { RhymeSwap, WordDen, SearchDen, Feelings } from "./components/activities.jsx";
 import { SwingBreak, DenTime } from "./components/reset.jsx";
 import { ParentView } from "./components/ParentView.jsx";
@@ -246,6 +246,7 @@ export default function App() {
             {!storyView && view === "bye"         && <Goodbye onRate={rated} />}
             {!storyView && view === "night"       && <Night />}
           </div>
+          {showBreak && <CharacterCorner />}
           {showBreak && (
             <button className="breakbtn" onClick={escapeToBreak} title="Take a break">
               🛝
