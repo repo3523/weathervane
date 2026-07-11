@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { storage } from "../lib/storage.js";
 import { soundOn, setSound } from "../lib/speech.js";
-import { loadThemes, saveTheme, deleteTheme, getActiveThemeId, setActiveThemeId } from "../lib/themes.js";
+import { loadThemes, loadThemesForChild, saveTheme, deleteTheme, getActiveThemeId, setActiveThemeId } from "../lib/themes.js";
 import { loadStories, saveStory, deleteStory } from "../lib/stories.js";
 import { supabase } from "../lib/supabase.js";
 import { ThemeWizard } from "./ThemeWizard.jsx";
@@ -137,82 +137,129 @@ export function ParentView({ onClose, onThemeChange, profiles = [], activeChildI
       {page === "settings" && (
         <div className="pv-page">
 
-          {/* Children — only when Supabase */}
-          {supabase && (
-            <section className="pv-section">
-              <h3 className="pv-section-title">Children</h3>
-              <div className="pv-row pv-themes-row">
-                {profiles.map(p => (
-                  <button
-                    key={p.id}
-                    className={`active-theme-btn ${p.id === activeChildId ? "active" : ""}`}
-                    onClick={() => onSwitchChild?.(p)}
-                  >
-                    {p.name}
-                  </button>
-                ))}
-                {!showAddChild
-                  ? <button className="active-theme-btn new-theme-btn" onClick={() => { setShowAddChild(true); setAddChildError(""); }}>+ Add child</button>
-                  : (
-                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                      <input
-                        className="wizard-text-input"
-                        style={{ maxWidth: 150 }}
-                        autoFocus
-                        placeholder="Child's name"
-                        value={newChildName}
-                        onChange={e => setNewChildName(e.target.value)}
-                        onKeyDown={e => e.key === "Enter" && handleAddChild()}
-                        disabled={addingChild}
-                      />
-                      <button className="review-done-btn" onClick={handleAddChild} disabled={addingChild || !newChildName.trim()}>
-                        {addingChild ? "Adding…" : "Add"}
-                      </button>
-                      <button onClick={() => { setShowAddChild(false); setNewChildName(""); }}>Cancel</button>
-                    </div>
-                  )
-                }
-              </div>
-              {addChildError && <p className="story-error" style={{ marginTop: 4 }}>{addChildError}</p>}
-            </section>
-          )}
-
-          {/* Themes */}
+          {/* Combined children + themes table */}
           <section className="pv-section">
             <div className="pv-section-header">
-              <h3 className="pv-section-title">Theme</h3>
+              <h3 className="pv-section-title">{supabase ? "Children & Themes" : "Themes"}</h3>
               <button className="pv-help-link" onClick={() => setShowThemeGuide(g => !g)}>
                 {showThemeGuide ? "✕ close" : "? how themes work"}
               </button>
             </div>
-            <div className="pv-row pv-themes-row">
-              {themes.map(t => (
-                <div key={t.id} className="theme-btn-wrap">
-                  <button
-                    className={`active-theme-btn ${t.id === activeId ? "active" : ""}`}
-                    onClick={() => activateTheme(t.id)}
-                  >
-                    {t.character.avatarUrl
-                      ? <img src={t.character.avatarUrl} alt={t.name} className="theme-btn-avatar" />
-                      : <>{t.character.emoji} </>
-                    }
-                    {t.name}
-                  </button>
-                  {t.id !== "wolf" && (
-                    <button
-                      className="theme-delete-btn"
-                      title={`Remove ${t.name} theme`}
-                      onClick={() => handleDeleteTheme(t.id)}
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button className="active-theme-btn new-theme-btn" onClick={() => setShowWizard(true)}>
-                + New theme
-              </button>
-            </div>
+            <table className="pv-table">
+              <thead>
+                <tr>
+                  {supabase && <th>Child</th>}
+                  <th>Themes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {supabase ? (
+                  <>
+                    {profiles.map(p => {
+                      const isActive = p.id === activeChildId;
+                      const rowThemes = isActive ? themes : loadThemesForChild(p.id);
+                      return (
+                        <tr key={p.id} className={isActive ? "pv-table-active-row" : ""}>
+                          <td className="pv-child-cell">
+                            {isActive
+                              ? <><span className="pv-child-dot" /><span className="pv-child-name">{p.name}</span></>
+                              : <button className="pv-child-switch-btn" onClick={() => onSwitchChild?.(p)}>{p.name}</button>
+                            }
+                          </td>
+                          <td className="pv-themes-cell">
+                            <div className="pv-theme-chips">
+                              {rowThemes.map(t => (
+                                <div key={t.id} className="pv-chip-wrap">
+                                  <button
+                                    className={`pv-theme-chip ${isActive && t.id === activeId ? "active" : ""} ${!isActive ? "pv-chip-readonly" : ""}`}
+                                    onClick={isActive ? () => activateTheme(t.id) : undefined}
+                                  >
+                                    {t.character.avatarUrl
+                                      ? <img src={t.character.avatarUrl} alt="" className="pv-chip-avatar" />
+                                      : <span>{t.character.emoji}</span>}
+                                    {t.name}
+                                  </button>
+                                  {isActive && (
+                                    <button
+                                      className="pv-chip-del"
+                                      title={`Remove ${t.name}`}
+                                      onClick={() => handleDeleteTheme(t.id)}
+                                    >×</button>
+                                  )}
+                                </div>
+                              ))}
+                              {isActive && (
+                                <button className="pv-theme-chip pv-chip-new" onClick={() => setShowWizard(true)}>
+                                  + New
+                                </button>
+                              )}
+                              {!isActive && rowThemes.length === 0 && (
+                                <span className="pv-chip-empty">—</span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    <tr className="pv-table-add-row">
+                      <td colSpan="2">
+                        {!showAddChild
+                          ? <button className="pv-table-add-btn" onClick={() => { setShowAddChild(true); setAddChildError(""); }}>+ Add child</button>
+                          : (
+                            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                              <input
+                                className="wizard-text-input"
+                                style={{ maxWidth: 150 }}
+                                autoFocus
+                                placeholder="Child's name"
+                                value={newChildName}
+                                onChange={e => setNewChildName(e.target.value)}
+                                onKeyDown={e => e.key === "Enter" && handleAddChild()}
+                                disabled={addingChild}
+                              />
+                              <button className="review-done-btn" onClick={handleAddChild} disabled={addingChild || !newChildName.trim()}>
+                                {addingChild ? "Adding…" : "Add"}
+                              </button>
+                              <button className="pv-table-btn" onClick={() => { setShowAddChild(false); setNewChildName(""); }}>Cancel</button>
+                            </div>
+                          )
+                        }
+                        {addChildError && <p className="story-error" style={{ marginTop: 4 }}>{addChildError}</p>}
+                      </td>
+                    </tr>
+                  </>
+                ) : (
+                  /* No Supabase — single child, just themes */
+                  <tr>
+                    <td className="pv-themes-cell">
+                      <div className="pv-theme-chips">
+                        {themes.map(t => (
+                          <div key={t.id} className="pv-chip-wrap">
+                            <button
+                              className={`pv-theme-chip ${t.id === activeId ? "active" : ""}`}
+                              onClick={() => activateTheme(t.id)}
+                            >
+                              {t.character.avatarUrl
+                                ? <img src={t.character.avatarUrl} alt="" className="pv-chip-avatar" />
+                                : <span>{t.character.emoji}</span>}
+                              {t.name}
+                            </button>
+                            <button
+                              className="pv-chip-del"
+                              title={`Remove ${t.name}`}
+                              onClick={() => handleDeleteTheme(t.id)}
+                            >×</button>
+                          </div>
+                        ))}
+                        <button className="pv-theme-chip pv-chip-new" onClick={() => setShowWizard(true)}>
+                          + New
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
             {showThemeGuide && (
               <div className="theme-guide">
                 <div className="theme-guide-item">

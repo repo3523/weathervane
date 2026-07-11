@@ -37,14 +37,18 @@ export async function pullFromSupabase(childId, allChildIds = null) {
   try {
     const { data } = await supabase
       .from("themes")
-      .select("data")
-      .eq("child_id", childId);
+      .select("child_id, data")
+      .in("child_id", storyIds);
 
-    if (data?.length) {
-      const local = JSON.parse(localStorage.getItem(THEMES_KEY) || "[]");
-      const seen  = new Set(local.map(t => t.id));
-      const fresh = data.map(r => r.data).filter(t => t && !seen.has(t.id));
-      if (fresh.length) localStorage.setItem(THEMES_KEY, JSON.stringify([...local, ...fresh]));
-    }
+    // Group by child and replace each child's cache (full replacement, no merge).
+    const byChild = {};
+    data?.forEach(r => {
+      if (r.data?.id && r.child_id) {
+        (byChild[r.child_id] ??= []).push(r.data);
+      }
+    });
+    storyIds.forEach(cid => {
+      localStorage.setItem(`wv_themes_${cid}`, JSON.stringify(byChild[cid] ?? []));
+    });
   } catch {}
 }

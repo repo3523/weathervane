@@ -676,3 +676,86 @@ th { background: #efe9dd; font-size: 12px; text-transform: uppercase; letter-spa
   border-radius: 12px; padding: 10px 16px; font-size: 14px;
   max-width: 360px; width: 100%;
 }
+
+/* ---------- parent view combined children+themes table ---------- */
+.pv-table {
+  width: 100%; border-collapse: collapse; font-size: 14px;
+  background: var(--card); border-radius: 10px; overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07); margin-top: 8px;
+}
+.pv-table thead th {
+  text-align: left; font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--soft); padding: 8px 12px;
+  background: #efe9dd; border-bottom: 1px solid #e4dfd6;
+}
+.pv-table td {
+  padding: 9px 12px; vertical-align: middle;
+  border-bottom: 1px solid #ede8df; color: var(--ink);
+}
+.pv-table tbody tr:last-child td { border-bottom: none; }
+.pv-table-active-row td { background: var(--ok-bg); }
+
+/* child name cell */
+.pv-child-cell { width: 100px; white-space: nowrap; }
+.pv-child-dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green); margin-right: 6px; vertical-align: middle; flex-shrink: 0;
+}
+.pv-child-name { font-weight: 600; }
+.pv-child-switch-btn {
+  border: none; background: none; padding: 0; cursor: pointer;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  color: var(--green); text-decoration: underline; text-underline-offset: 3px;
+}
+.pv-child-switch-btn:hover { color: #3a7a2e; }
+
+/* themes cell — chip pills */
+.pv-themes-cell { vertical-align: middle; }
+.pv-theme-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pv-chip-wrap { display: flex; align-items: center; }
+.pv-theme-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  border: 1.5px solid #c8c0b4; border-radius: 20px; padding: 3px 10px 3px 7px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  background: #fdfbf6; color: var(--ink); font-family: inherit;
+  transition: background 0.12s, border-color 0.12s;
+}
+.pv-theme-chip.active {
+  border-color: var(--green); background: var(--ok-bg); color: #3a7a2e;
+}
+.pv-theme-chip:hover:not(.active) { background: #ede8df; }
+.pv-chip-avatar { width: 18px; height: 18px; border-radius: 3px; object-fit: cover; flex-shrink: 0; }
+.pv-chip-del {
+  border: none; background: none; color: #b0a898; font-size: 14px;
+  cursor: pointer; padding: 0 0 0 2px; line-height: 1; font-family: inherit;
+  transition: color 0.12s;
+}
+.pv-chip-del:hover { color: #b3542e; }
+.pv-chip-new {
+  border-style: dashed; color: var(--soft); padding: 3px 10px;
+}
+.pv-chip-new:hover { background: #f0ebe0 !important; color: var(--ink) !important; border-color: #a0988e !important; }
+.pv-chip-readonly { cursor: default; opacity: 0.55; pointer-events: none; }
+.pv-chip-empty { font-size: 13px; color: var(--soft); }
+
+/* shared action / add-row buttons */
+.pv-active-badge {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  color: var(--green); background: #d8edcf;
+  border: 1px solid var(--green); border-radius: 10px; padding: 2px 8px;
+}
+.pv-table-btn {
+  border: 1px solid #c8c0b4; border-radius: 8px; padding: 4px 12px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  background: #fdfbf6; color: var(--ink); font-family: inherit;
+  transition: background 0.12s;
+}
+.pv-table-btn:hover { background: #ede8df; }
+.pv-table-add-row td { padding: 8px 12px; }
+.pv-table-add-btn {
+  border: 1px dashed #c0b8ae; border-radius: 8px; padding: 5px 14px;
+  font-size: 13px; cursor: pointer; background: none;
+  color: var(--soft); font-family: inherit; transition: background 0.12s, color 0.12s;
+}
+.pv-table-add-btn:hover { background: #f0ebe0; color: var(--ink); }

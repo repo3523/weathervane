@@ -45,7 +45,7 @@ export default function App() {
     if (profile.id === childId) return;
     setActiveChildId(profile.id);
     // Clear per-child cache (themes, sessions) — stories are account-wide, keep them
-    ["wv_themes", "wv_active_theme", "wv_sessions"].forEach(k => localStorage.removeItem(k));
+    localStorage.removeItem("wv_sessions");
     // Pull new child's data BEFORE updating state so ParentView remounts with correct data
     await pullFromSupabase(profile.id, profiles.map(p => p.id));
     setChildId(profile.id);

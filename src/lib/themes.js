@@ -342,12 +342,29 @@ async function toBlob(url) {
 }
 
 /* Theme storage API — synchronous because themes are needed at render time */
+
+// Per-child storage key: wv_themes_<childId> when authenticated, plain THEMES_KEY otherwise.
+function themesKey() {
+  return activeChildId ? `wv_themes_${activeChildId}` : THEMES_KEY;
+}
+
 export function loadThemes() {
   try {
-    const saved = JSON.parse(localStorage.getItem(THEMES_KEY) || "[]");
-    return [WOLF_THEME, ...saved];
+    return JSON.parse(localStorage.getItem(themesKey()) || "[]")
+      .filter(t => t && t.id && t.character);
   } catch {
-    return [WOLF_THEME];
+    return [];
+  }
+}
+
+// Read any child's themes without switching — used to render inactive rows in ParentView.
+export function loadThemesForChild(childId) {
+  if (!childId) return loadThemes();
+  try {
+    return JSON.parse(localStorage.getItem(`wv_themes_${childId}`) || "[]")
+      .filter(t => t && t.id && t.character);
+  } catch {
+    return [];
   }
 }
 
@@ -371,10 +388,10 @@ export async function saveTheme(theme) {
     } catch {}
   }
 
-  const existing = loadThemes().filter(t => t.id !== "wolf" && t.id !== out.id);
-  localStorage.setItem(THEMES_KEY, JSON.stringify([...existing, out]));
+  const existing = loadThemes().filter(t => t.id !== out.id);
+  localStorage.setItem(themesKey(), JSON.stringify([...existing, out]));
 
-  if (supabase && activeChildId && out.id !== "wolf") {
+  if (supabase && activeChildId) {
     supabase.from("themes")
       .upsert({ id: out.id, child_id: activeChildId, data: out })
       .then().catch(() => {});
@@ -384,24 +401,30 @@ export async function saveTheme(theme) {
 }
 
 export function deleteTheme(id) {
-  if (id === "wolf") return;
-  const saved = loadThemes().filter(t => t.id !== "wolf" && t.id !== id);
-  localStorage.setItem(THEMES_KEY, JSON.stringify(saved));
-  if (getActiveThemeId() === id) setActiveThemeId("wolf");
+  const saved = loadThemes().filter(t => t.id !== id);
+  localStorage.setItem(themesKey(), JSON.stringify(saved));
+  if (getActiveThemeId() === id) {
+    setActiveThemeId(saved[0]?.id ?? "");
+  }
   if (supabase && activeChildId) {
     supabase.from("themes").delete().eq("id", id).then().catch(() => {});
   }
 }
 
+function activeKey() {
+  return activeChildId ? `wv_active_theme_${activeChildId}` : ACTIVE_KEY;
+}
+
 export function getActiveThemeId() {
-  return localStorage.getItem(ACTIVE_KEY) || "wolf";
+  return localStorage.getItem(activeKey()) || "";
 }
 
 export function setActiveThemeId(id) {
-  localStorage.setItem(ACTIVE_KEY, id);
+  localStorage.setItem(activeKey(), id);
 }
 
 export function getActiveTheme() {
   const id = getActiveThemeId();
-  return loadThemes().find(t => t.id === id) || WOLF_THEME;
+  const themes = loadThemes();
+  return themes.find(t => t.id === id) || themes[0] || WOLF_THEME;
 }
