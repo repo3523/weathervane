@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { ScheduleStrip } from "./components/ui.jsx";
 import { StartScreen, WeatherCheck, WeatherReaction, BubbleGame, ResetChoice, Goodbye, Night, CharacterCorner } from "./components/screens.jsx";
 import { RhymeSwap, WordDen, SearchDen, Feelings } from "./components/activities.jsx";
-import { SwingBreak, DenTime } from "./components/reset.jsx";
+import { SwingBreak, DenTime, AnimalPhotos } from "./components/reset.jsx";
 import { ParentView } from "./components/ParentView.jsx";
 import { StoryShelf, StoryReader } from "./components/StoryReader.jsx";
 import { AuthGate } from "./components/AuthGate.jsx";
@@ -187,6 +187,13 @@ export default function App() {
     setView("bye");
   }
 
+  function photosDone(result) {
+    sess.current.results.push({ type: "photos", ...result });
+    const byeIdx = plan.indexOf("bye");
+    setStep(byeIdx);
+    setView("bye");
+  }
+
   async function rated(rating) {
     const s = sess.current;
     const avg = s.latencies.length ? Math.round(s.latencies.reduce((a, b) => a + b, 0) / s.latencies.length) : null;
@@ -242,6 +249,7 @@ export default function App() {
             {!storyView && ActivityComp           && <ActivityComp onComplete={activityDone} />}
             {!storyView && view === "swing"       && <SwingBreak onBack={swingDone} />}
             {!storyView && view === "den"         && <DenTime onDone={denDone} />}
+            {!storyView && view === "photos"      && <AnimalPhotos onComplete={photosDone} />}
             {!storyView && view === "recheck"     && <WeatherCheck title={`How is your ${activeTheme.character.name} now?`} onPick={recheckPicked} />}
             {!storyView && view === "bye"         && <Goodbye onRate={rated} />}
             {!storyView && view === "night"       && <Night />}

@@ -143,7 +143,7 @@ export function SearchDen({ onComplete }) {
 
   return (
     <div className="screen fade-in" key={index}>
-      <Wolf size="md" />
+      <Wolf face={theme.character.emoji} size="md" avatarUrl={theme.character.avatarUrl} />
       <h1 className="clue">{item.clue}</h1>
       <div className="searchbox">
         🔍

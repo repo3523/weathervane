@@ -9,3 +9,6 @@ weathervane-log-*.json
 
 # Local env — Supabase keys, never commit
 .env.local
+.env*
+
+.DS_Store

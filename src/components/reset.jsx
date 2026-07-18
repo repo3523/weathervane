@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Wolf, BigButton } from "./ui.jsx";
 import { say } from "../lib/speech.js";
 import { chimeSoft } from "../lib/fx.js";
-import { pick } from "../lib/content.js";
+import { pick, ANIMAL_SEARCHES } from "../lib/content.js";
 import { useTheme } from "../lib/ThemeContext.jsx";
 
 const SWING_SECONDS = 5 * 60;
@@ -96,6 +96,141 @@ export function DenTime({ onDone }) {
       </div>
       <div className="row bottom-row">
         <BigButton className="small" onClick={onDone}>🌙 Done</BigButton>
+      </div>
+    </div>
+  );
+}
+
+const MAX_ANIMAL_SEARCHES = 4;
+
+/* X3 — Animal photos: real photos of an animal he picks, several at once so he
+   can see it from different angles — his own Google-Images habit, on a leash.
+   No score, no wrong answers, exit anytime. Search count is capped (see
+   MAX_ANIMAL_SEARCHES) so open-ended photo browsing doesn't turn into the kind
+   of perseverative loop the validation plan watches for. */
+export function AnimalPhotos({ onComplete }) {
+  const t = useTheme();
+  const [typed, setTyped] = useState("");
+  const [current, setCurrent] = useState(null);
+  const [photos, setPhotos] = useState([]);
+  const [status, setStatus] = useState("idle"); // idle | loading | ready | empty | error
+  const [viewerIndex, setViewerIndex] = useState(null);
+  const searched = useRef([]);
+  const cache = useRef({});
+
+  useEffect(() => { say("Let's look at animal photos! Type an animal you like."); }, []);
+
+  const typedLower = typed.trim().toLowerCase();
+  const matches = typedLower
+    ? ANIMAL_SEARCHES.filter((a) => a.name.startsWith(typedLower))
+    : [];
+  const doneSearching = searched.current.length >= MAX_ANIMAL_SEARCHES;
+
+  async function pickAnimal(name) {
+    setTyped("");
+    setViewerIndex(null);
+    setCurrent(name);
+
+    if (cache.current[name]) {
+      setPhotos(cache.current[name]);
+      setStatus(cache.current[name].length ? "ready" : "empty");
+      return;
+    }
+
+    setStatus("loading");
+    try {
+      const r = await fetch("/api/search-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ animal: name }),
+      });
+      const data = await r.json();
+      const found = r.ok ? (data.photos ?? []) : [];
+      cache.current[name] = found;
+      setPhotos(found);
+      setStatus(found.length ? "ready" : "empty");
+      searched.current = [...new Set([...searched.current, name])];
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  function dropPhoto(bad) {
+    setPhotos((ps) => ps.filter((p) => p.full !== bad.full));
+  }
+
+  function finish() {
+    onComplete({ animals: searched.current });
+  }
+
+  return (
+    <div className="screen fade-in">
+      <Wolf face={t.character.emoji} size="sm" avatarUrl={t.character.avatarUrl} />
+      <h1>Animal photos</h1>
+
+      {!doneSearching && status !== "loading" && (
+        <>
+          <p className="sub">Type an animal to see pictures</p>
+          <div className="searchbox">
+            🔍
+            <input
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              placeholder="Type here…"
+              autoComplete="off"
+              autoCapitalize="off"
+              autoFocus
+            />
+          </div>
+          {matches.length > 0 && (
+            <div className="sugg">
+              {matches.map((a) => (
+                <button key={a.name} onClick={() => pickAnimal(a.name)}>
+                  <span style={{ fontSize: 30 }}>{a.emoji}</span> {a.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {status === "loading" && <p className="sub">Looking for {current} photos…</p>}
+      {status === "error" && <p className="sub">Photos aren't working right now. Try another animal!</p>}
+      {status === "empty" && <p className="sub">No photos found. Try another animal!</p>}
+      {doneSearching && status !== "loading" && <p className="sub">Great looking! All done for now.</p>}
+
+      {status === "ready" && (
+        <div className="photogrid">
+          {photos.map((p) => (
+            <button
+              key={p.full}
+              className="photocard"
+              onClick={() => setViewerIndex(photos.indexOf(p))}
+            >
+              <img src={p.thumbnail} alt="" loading="lazy" onError={() => dropPhoto(p)} />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {viewerIndex !== null && photos[viewerIndex] && (
+        <div className="photoviewer" onClick={() => setViewerIndex(null)}>
+          <img
+            src={photos[viewerIndex].full}
+            alt=""
+            onClick={(e) => e.stopPropagation()}
+            onError={() => setViewerIndex((i) => (i + 1 < photos.length ? i + 1 : null))}
+          />
+          <div className="row" onClick={(e) => e.stopPropagation()}>
+            <BigButton className="small" onClick={() => setViewerIndex((i) => (i - 1 + photos.length) % photos.length)}>⬅️</BigButton>
+            <BigButton className="small" onClick={() => setViewerIndex((i) => (i + 1) % photos.length)}>➡️</BigButton>
+            <BigButton className="small" onClick={() => setViewerIndex(null)}>✕ Close</BigButton>
+          </div>
+        </div>
+      )}
+
+      <div className="row bottom-row">
+        <BigButton className="small" onClick={finish}>🌙 Done</BigButton>
       </div>
     </div>
   );

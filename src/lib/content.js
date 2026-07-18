@@ -47,9 +47,27 @@ export const WOLF_SAYS = {
   goodbye: "Awooo! All done for today. See you tomorrow, friend!",
 };
 
+/* Whitelist for the animal photo search (X3 / AnimalPhotos in reset.jsx).
+   Also imported server-side by api/search-images.js — keep this the single source
+   of truth so the client autocomplete and the server-side guard never drift apart. */
+export const ANIMAL_SEARCHES = [
+  { name: "wolf", emoji: "🐺" }, { name: "fox", emoji: "🦊" }, { name: "lion", emoji: "🦁" },
+  { name: "tiger", emoji: "🐯" }, { name: "zebra", emoji: "🦓" }, { name: "giraffe", emoji: "🦒" },
+  { name: "elephant", emoji: "🐘" }, { name: "panda", emoji: "🐼" }, { name: "koala", emoji: "🐨" },
+  { name: "kangaroo", emoji: "🦘" }, { name: "penguin", emoji: "🐧" }, { name: "owl", emoji: "🦉" },
+  { name: "eagle", emoji: "🦅" }, { name: "dolphin", emoji: "🐬" }, { name: "whale", emoji: "🐋" },
+  { name: "shark", emoji: "🦈" }, { name: "turtle", emoji: "🐢" }, { name: "rabbit", emoji: "🐰" },
+  { name: "squirrel", emoji: "🐿️" }, { name: "deer", emoji: "🦌" }, { name: "bear", emoji: "🐻" },
+  { name: "monkey", emoji: "🐵" }, { name: "gorilla", emoji: "🦍" }, { name: "cheetah", emoji: "🐆" },
+  { name: "hedgehog", emoji: "🦔" }, { name: "otter", emoji: "🦦" }, { name: "flamingo", emoji: "🦩" },
+  { name: "peacock", emoji: "🦚" }, { name: "parrot", emoji: "🦜" }, { name: "frog", emoji: "🐸" },
+  { name: "butterfly", emoji: "🦋" }, { name: "horse", emoji: "🐴" }, { name: "dog", emoji: "🐶" },
+  { name: "cat", emoji: "🐱" },
+];
+
 export const ICONS = {
   check: "🌤️", rhyme: "🎵", words: "🏠", search: "🔍",
-  feelings: "💛", swing: "🛝", den: "🫧", bye: "🌙",
+  feelings: "💛", swing: "🛝", den: "🫧", photos: "📷", bye: "🌙",
 };
 
 export const pick = (a) => a[Math.floor(Math.random() * a.length)];

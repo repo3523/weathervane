@@ -141,6 +141,7 @@ export function ResetChoice({ onPick }) {
       <div className="row">
         <BigButton onClick={() => onPick("swing")}><span className="em">🛝</span>Swing time</BigButton>
         <BigButton onClick={() => onPick("den")}><span className="em">🫧</span>Den time</BigButton>
+        <BigButton onClick={() => onPick("photos")}><span className="em">📷</span>Animal photos</BigButton>
       </div>
     </div>
   );
