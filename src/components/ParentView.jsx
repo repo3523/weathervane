@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { storage } from "../lib/storage.js";
-import { soundOn, setSound } from "../lib/speech.js";
+import { soundOn, setSound, getAvailableVoices, getSelectedVoiceURI, setSelectedVoiceURI, previewVoice } from "../lib/speech.js";
 import { loadThemes, loadThemesForChild, saveTheme, deleteTheme, getActiveThemeId, setActiveThemeId } from "../lib/themes.js";
 import { loadStories, saveStory, deleteStory } from "../lib/stories.js";
 import { supabase } from "../lib/supabase.js";
@@ -11,6 +11,8 @@ export function ParentView({ onClose, onThemeChange, profiles = [], activeChildI
   const [page, setPage] = useState("settings"); // "settings" | "sessions"
   const [log, setLog] = useState([]);
   const [sound, setSoundState] = useState(soundOn());
+  const [voices, setVoices] = useState(() => getAvailableVoices());
+  const [selectedVoice, setSelectedVoice] = useState(() => getSelectedVoiceURI());
   const [themes, setThemes] = useState(() => loadThemes());
   const [activeId, setActiveId] = useState(() => getActiveThemeId());
   const [showWizard, setShowWizard] = useState(false);
@@ -27,9 +29,22 @@ export function ParentView({ onClose, onThemeChange, profiles = [], activeChildI
 
   useEffect(() => { storage.loadSessions().then(setLog); }, []);
 
+  // Voice list loads asynchronously on most browsers — refresh once it's ready.
+  useEffect(() => {
+    function refresh() { setVoices(getAvailableVoices()); }
+    refresh();
+    window.speechSynthesis?.addEventListener?.("voiceschanged", refresh);
+    return () => window.speechSynthesis?.removeEventListener?.("voiceschanged", refresh);
+  }, []);
+
   function toggleSound() {
     setSound(!sound);
     setSoundState(!sound);
+  }
+
+  function chooseVoice(uri) {
+    setSelectedVoiceURI(uri);
+    setSelectedVoice(uri);
   }
 
   async function clearAll() {
@@ -136,6 +151,28 @@ export function ParentView({ onClose, onThemeChange, profiles = [], activeChildI
       {/* ── SETTINGS PAGE ── */}
       {page === "settings" && (
         <div className="pv-page">
+
+          {/* Voice */}
+          <section className="pv-section">
+            <h3 className="pv-section-title">Voice</h3>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <select
+                className="wizard-text-input"
+                style={{ maxWidth: 280 }}
+                value={selectedVoice}
+                onChange={(e) => chooseVoice(e.target.value)}
+              >
+                <option value="">Automatic (recommended)</option>
+                {voices.map(v => (
+                  <option key={v.voiceURI} value={v.voiceURI}>{v.name} ({v.lang})</option>
+                ))}
+              </select>
+              <button className="pv-table-btn" onClick={() => previewVoice(selectedVoice)}>▶️ Preview</button>
+            </div>
+            {voices.length === 0 && (
+              <p className="pv-note">No voices found yet — close and reopen this screen in a moment.</p>
+            )}
+          </section>
 
           {/* Combined children + themes table */}
           <section className="pv-section">
