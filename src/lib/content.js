@@ -49,7 +49,9 @@ export const WOLF_SAYS = {
 
 /* Whitelist for the animal photo search (X3 / AnimalPhotos in reset.jsx).
    Also imported server-side by api/search-images.js — keep this the single source
-   of truth so the client autocomplete and the server-side guard never drift apart. */
+   of truth so the client and the server-side guard never drift apart. There's no
+   autocomplete hinting what's on this list (search is free-typed), so anything
+   missing here just silently shows "no photos found" — add common animals liberally. */
 export const ANIMAL_SEARCHES = [
   { name: "wolf", emoji: "🐺" }, { name: "fox", emoji: "🦊" }, { name: "lion", emoji: "🦁" },
   { name: "tiger", emoji: "🐯" }, { name: "zebra", emoji: "🦓" }, { name: "giraffe", emoji: "🦒" },
@@ -62,8 +64,68 @@ export const ANIMAL_SEARCHES = [
   { name: "hedgehog", emoji: "🦔" }, { name: "otter", emoji: "🦦" }, { name: "flamingo", emoji: "🦩" },
   { name: "peacock", emoji: "🦚" }, { name: "parrot", emoji: "🦜" }, { name: "frog", emoji: "🐸" },
   { name: "butterfly", emoji: "🦋" }, { name: "horse", emoji: "🐴" }, { name: "dog", emoji: "🐶" },
-  { name: "cat", emoji: "🐱" },
+  { name: "cat", emoji: "🐱" }, { name: "raccoon", emoji: "🦝" }, { name: "hippo", emoji: "🦛" },
+  { name: "rhino", emoji: "🦏" }, { name: "crocodile", emoji: "🐊" }, { name: "snake", emoji: "🐍" },
+  { name: "chicken", emoji: "🐔" }, { name: "duck", emoji: "🦆" }, { name: "cow", emoji: "🐮" },
+  { name: "pig", emoji: "🐷" }, { name: "goat", emoji: "🐐" }, { name: "sheep", emoji: "🐑" },
+  { name: "camel", emoji: "🐫" }, { name: "bat", emoji: "🦇" }, { name: "seal", emoji: "🦭" },
+  { name: "llama", emoji: "🦙" }, { name: "sloth", emoji: "🦥" },
 ];
+
+/* One short, literal, spoken-aloud fact per animal — see AnimalPhotos in reset.jsx.
+   Keep every entry one simple sentence, no idioms, matching this app's copy rules. */
+export const ANIMAL_FACTS = {
+  wolf: "Wolves live together in a group called a pack.",
+  fox: "A fox has a bushy tail and pointy ears.",
+  lion: "A lion's roar can be heard from far away.",
+  tiger: "Tigers have orange fur with black stripes.",
+  zebra: "Every zebra has its own pattern of stripes.",
+  giraffe: "A giraffe has a very long neck to reach leaves.",
+  elephant: "Elephants use their trunk to drink and eat.",
+  panda: "Pandas eat bamboo almost all day long.",
+  koala: "Koalas sleep in trees most of the day.",
+  kangaroo: "A kangaroo carries its baby in a pouch.",
+  penguin: "Penguins cannot fly, but they are great swimmers.",
+  owl: "Owls can turn their head almost all the way around.",
+  eagle: "Eagles have very sharp eyes to spot food far away.",
+  dolphin: "Dolphins talk to each other with clicks and whistles.",
+  whale: "A whale is the biggest animal in the ocean.",
+  shark: "Sharks have many rows of sharp teeth.",
+  turtle: "A turtle carries its shell everywhere it goes.",
+  rabbit: "Rabbits have long ears and strong back legs for hopping.",
+  squirrel: "Squirrels bury nuts to eat later in winter.",
+  deer: "Male deer grow antlers on their head.",
+  bear: "Bears sleep for a long time in winter.",
+  monkey: "Monkeys use their tails to help them climb.",
+  gorilla: "Gorillas are very strong and gentle animals.",
+  cheetah: "A cheetah is the fastest land animal.",
+  hedgehog: "A hedgehog curls into a ball to stay safe.",
+  otter: "Otters hold hands with each other while they sleep.",
+  flamingo: "A flamingo stands on one leg to rest.",
+  peacock: "A peacock spreads its colorful tail feathers.",
+  parrot: "Some parrots can learn to copy words.",
+  frog: "A frog uses its long tongue to catch bugs.",
+  butterfly: "A butterfly starts its life as a caterpillar.",
+  horse: "Horses can sleep while standing up.",
+  dog: "Dogs wag their tail when they feel happy.",
+  cat: "Cats use their whiskers to feel their way around.",
+  raccoon: "Raccoons wash their food before they eat it.",
+  hippo: "A hippo spends most of the day in the water.",
+  rhino: "A rhino has a big horn on its nose.",
+  crocodile: "A crocodile can stay very still to hide in water.",
+  snake: "A snake moves without any legs at all.",
+  chicken: "A chicken lays eggs almost every day.",
+  duck: "Duck feathers keep water from soaking their skin.",
+  cow: "A cow eats grass and chews it slowly.",
+  pig: "Pigs are very smart and love to roll in mud.",
+  goat: "Goats are great climbers and can jump high.",
+  sheep: "A sheep's wool keeps growing all year.",
+  camel: "A camel stores fat in its hump, not water.",
+  bat: "Bats sleep upside down during the day.",
+  seal: "Seals are fast swimmers but slow on land.",
+  llama: "A llama can carry heavy loads on its back.",
+  sloth: "A sloth moves very, very slowly.",
+};
 
 export const ICONS = {
   check: "🌤️", rhyme: "🎵", words: "🏠", search: "🔍",

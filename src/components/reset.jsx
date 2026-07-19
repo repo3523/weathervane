@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Wolf, BigButton } from "./ui.jsx";
 import { say } from "../lib/speech.js";
 import { chimeSoft } from "../lib/fx.js";
-import { pick } from "../lib/content.js";
+import { pick, ANIMAL_FACTS } from "../lib/content.js";
 import { useTheme } from "../lib/ThemeContext.jsx";
 
 const SWING_SECONDS = 5 * 60;
@@ -131,6 +131,7 @@ export function AnimalPhotos({ onComplete }) {
     if (cache.current[name]) {
       setPhotos(cache.current[name]);
       setStatus(cache.current[name].length ? "ready" : "empty");
+      if (cache.current[name].length && ANIMAL_FACTS[name]) say(ANIMAL_FACTS[name]);
       return;
     }
 
@@ -148,7 +149,10 @@ export function AnimalPhotos({ onComplete }) {
       setStatus(found.length ? "ready" : "empty");
       // Only count searches that actually turned up something — a mistyped
       // or unlisted animal shouldn't eat into his search budget.
-      if (found.length) searched.current = [...new Set([...searched.current, name])];
+      if (found.length) {
+        searched.current = [...new Set([...searched.current, name])];
+        if (ANIMAL_FACTS[name]) say(ANIMAL_FACTS[name]);
+      }
     } catch {
       setStatus("error");
     }
@@ -196,6 +200,15 @@ export function AnimalPhotos({ onComplete }) {
       {status === "error" && <p className="sub">Photos aren't working right now. Try another animal!</p>}
       {status === "empty" && <p className="sub">No photos found. Try another animal!</p>}
       {doneSearching && status !== "loading" && <p className="sub">Great looking! All done for now.</p>}
+
+      {status === "ready" && ANIMAL_FACTS[current] && (
+        <>
+          <p className="sub">{ANIMAL_FACTS[current]}</p>
+          <div className="row">
+            <BigButton className="small" onClick={() => say(ANIMAL_FACTS[current])}>🔊 Hear it</BigButton>
+          </div>
+        </>
+      )}
 
       {status === "ready" && (
         <div className="photogrid">
