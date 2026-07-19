@@ -14,35 +14,33 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "animal not allowed" });
   }
 
-  const apiKey = process.env.GOOGLE_CSE_API_KEY;
-  const cx = process.env.GOOGLE_CSE_CX;
-  if (!apiKey || !cx) {
-    console.error("search-images: GOOGLE_CSE_API_KEY/GOOGLE_CSE_CX not configured");
+  const apiKey = process.env.PIXABAY_API_KEY;
+  if (!apiKey) {
+    console.error("search-images: PIXABAY_API_KEY not configured");
     return res.status(500).json({ error: "search not configured" });
   }
 
-  const url = new URL("https://www.googleapis.com/customsearch/v1");
+  const url = new URL("https://pixabay.com/api/");
   url.searchParams.set("key", apiKey);
-  url.searchParams.set("cx", cx);
-  url.searchParams.set("q", `${query} animal`);
-  url.searchParams.set("searchType", "image");
-  url.searchParams.set("safe", "active");
-  url.searchParams.set("imgSize", "large");
-  url.searchParams.set("num", "8");
+  url.searchParams.set("q", query);
+  url.searchParams.set("image_type", "all"); // mixes in illustrations/vectors (cartoons) alongside real photos
+  url.searchParams.set("category", "animals");
+  url.searchParams.set("safesearch", "true"); // defaults to false — must set explicitly
+  url.searchParams.set("per_page", "8");
 
   try {
     const r = await fetch(url);
     if (!r.ok) {
-      console.error("search-images: Google CSE error", r.status, await r.text());
+      console.error("search-images: Pixabay error", r.status, await r.text());
       return res.status(502).json({ error: "search failed" });
     }
     const data = await r.json();
-    const photos = (data.items ?? [])
-      .filter((item) => item.link && item.image?.thumbnailLink)
-      .map((item) => ({
-        full: item.link,
-        thumbnail: item.image.thumbnailLink,
-        title: item.title ?? query,
+    const photos = (data.hits ?? [])
+      .filter((h) => h.largeImageURL && h.webformatURL)
+      .map((h) => ({
+        full: h.largeImageURL,
+        thumbnail: h.webformatURL,
+        title: h.tags || query,
       }));
     return res.status(200).json({ photos });
   } catch (err) {
