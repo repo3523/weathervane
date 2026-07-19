@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Wolf, BigButton } from "./ui.jsx";
 import { say } from "../lib/speech.js";
 import { chimeSoft } from "../lib/fx.js";
-import { pick, ANIMAL_SEARCHES } from "../lib/content.js";
+import { pick } from "../lib/content.js";
 import { useTheme } from "../lib/ThemeContext.jsx";
 
 const SWING_SECONDS = 5 * 60;
@@ -120,13 +120,10 @@ export function AnimalPhotos({ onComplete }) {
 
   useEffect(() => { say("Let's look at animal photos! Type an animal you like."); }, []);
 
-  const typedLower = typed.trim().toLowerCase();
-  const matches = typedLower
-    ? ANIMAL_SEARCHES.filter((a) => a.name.startsWith(typedLower))
-    : [];
   const doneSearching = searched.current.length >= MAX_ANIMAL_SEARCHES;
 
   async function pickAnimal(name) {
+    if (!name) return;
     setTyped("");
     setViewerIndex(null);
     setCurrent(name);
@@ -149,10 +146,16 @@ export function AnimalPhotos({ onComplete }) {
       cache.current[name] = found;
       setPhotos(found);
       setStatus(found.length ? "ready" : "empty");
-      searched.current = [...new Set([...searched.current, name])];
+      // Only count searches that actually turned up something — a mistyped
+      // or unlisted animal shouldn't eat into his search budget.
+      if (found.length) searched.current = [...new Set([...searched.current, name])];
     } catch {
       setStatus("error");
     }
+  }
+
+  function submitSearch() {
+    pickAnimal(typed.trim().toLowerCase());
   }
 
   function dropPhoto(bad) {
@@ -176,21 +179,16 @@ export function AnimalPhotos({ onComplete }) {
             <input
               value={typed}
               onChange={(e) => setTyped(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") submitSearch(); }}
               placeholder="Type here…"
               autoComplete="off"
               autoCapitalize="off"
               autoFocus
             />
           </div>
-          {matches.length > 0 && (
-            <div className="sugg">
-              {matches.map((a) => (
-                <button key={a.name} onClick={() => pickAnimal(a.name)}>
-                  <span style={{ fontSize: 30 }}>{a.emoji}</span> {a.name}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="row">
+            <BigButton className="small" onClick={submitSearch}>🔍 Search</BigButton>
+          </div>
         </>
       )}
 
